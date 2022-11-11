@@ -2,7 +2,7 @@
 
 # Device
 export FOX_BRANCH="fox_12.1"
-export DT_LINK="https://github.com/mmtrt/android_device_xiaomi_evergreen.git -b fox_12.1"
+export DT_LINK="https://github.com/mmtrt/android_device_xiaomi_evergreen.git -b fox-12.1"
 
 export DEVICE="evergreen"
 export OEM="xiaomi"
