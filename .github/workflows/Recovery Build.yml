@@ -1,0 +1,25 @@
+name: Recovery Build
+
+on:
+jobs:
+  build:
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 12
+
+    - name: Set envars
+      run: |
+        echo "FOX_SYNC=https://gitlab.com/OrangeFox/sync.git" >> $GITHUB_ENV
+        echo "CONFIG=config.sh"  >> $GITHUB_ENV
+
+    - name: Run the build process with Docker
+      uses: addnab/docker-run-action@v3
+      with:
+        image: ghcr.io/sushrut1101/docker:arch
+        run: |
+          source config.sh
+          curl -sL https://raw.githubusercontent.com/OrangeFoxRecovery/OrangeFox-CI/fox/scripts/checks.sh | bash
+          curl -sL https://raw.githubusercontent.com/OrangeFoxRecovery/OrangeFox-CI/fox/scripts/sync.sh | bash
+          curl -sL https://raw.githubusercontent.com/OrangeFoxRecovery/OrangeFox-CI/fox/scripts/build.sh | bash
+          curl -sL https://raw.githubusercontent.com/OrangeFoxRecovery/OrangeFox-CI/fox/scripts/upload.sh | bash
