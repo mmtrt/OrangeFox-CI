@@ -1,25 +1,34 @@
 name: Recovery Build
 
 on:
+  push:
+    branches: [ main ]
+    paths-ignore: [ '**/README.md' ]
+  pull_request:
+    branches: [ main ]
+    paths-ignore: [ '**/README.md' ]
+
 jobs:
-  build:
-    - name: Set Swap Space
-      uses: pierotofy/set-swap-space@master
-      with:
-        swap-size-gb: 12
+  compile:
+    runs-on: ubuntu-latest
+    steps:
 
-    - name: Set envars
-      run: |
-        echo "FOX_SYNC=https://gitlab.com/OrangeFox/sync.git" >> $GITHUB_ENV
-        echo "CONFIG=config.sh"  >> $GITHUB_ENV
-
-    - name: Run the build process with Docker
-      uses: addnab/docker-run-action@v3
+    - name: Checkout
+      uses: actions/checkout@v3 # Required to mount the Github Workspace to a volume
+    - uses: addnab/docker-run-action@v3
       with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
         image: ghcr.io/sushrut1101/docker:arch
+        shell: bash
         run: |
+          git clone https://github.com/mmtrt/OrangeFox-CI
+          cd OrangeFox-CI ; ls -al ; chmod +x scripts/*.sh ; chmod +x *.sh
+          echo $PWD
+          export FOX_SYNC=https://gitlab.com/OrangeFox/sync.git
+          export CONFIG=/root/OrangeFox-CI/config.sh
           source config.sh
-          curl -sL https://raw.githubusercontent.com/OrangeFoxRecovery/OrangeFox-CI/fox/scripts/checks.sh | bash
-          curl -sL https://raw.githubusercontent.com/OrangeFoxRecovery/OrangeFox-CI/fox/scripts/sync.sh | bash
-          curl -sL https://raw.githubusercontent.com/OrangeFoxRecovery/OrangeFox-CI/fox/scripts/build.sh | bash
-          curl -sL https://raw.githubusercontent.com/OrangeFoxRecovery/OrangeFox-CI/fox/scripts/upload.sh | bash
+          bash scripts/checks.sh
+          bash scripts/sync.sh
+          bash scripts/build.sh
+          bash scripts/upload.sh
